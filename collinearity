@@ -1,0 +1,126 @@
+library(tidyverse)
+library(readxl)
+library(gggenes)
+library(ggforce)
+
+dat01 <- read.csv("collinearity_drawing1.csv",header = T)
+head(dat01)
+
+
+dat01 %>% 
+  mutate(X1=case_when(
+    X5 == "species01" ~ X1,
+    X5 == "species02" ~ X1 -65,  #  目的是使短的基因居中
+  ),
+  X2=case_when(
+    X5 == "species01" ~ X2,
+    X5 == "species02" ~ X2 -65,
+  )) -> dat01
+
+
+
+dat01 %>% 
+  group_by(X5) %>% 
+  summarise(min=max(X1),
+            max=max(X2))
+
+
+dat01 %>% 
+  group_by(X5) %>% 
+  summarise(min=min(X1),
+            max=max(X2),
+            X7=min(X3)) %>% 
+  ungroup() -> segment.df
+
+# 先导出dat01的数据方便后续画共性线
+
+write.csv(dat01,"d:/bioinformatics/R/training/dat01_collinearity.csv")
+
+#  先绘制基因结构
+
+ggplot()+
+  geom_segment(data=segment.df,
+               aes(x=min-3,xend=max+3,y=X7,yend=X7),
+               color="grey")+
+  geom_gene_arrow(data=dat01,
+                  aes(xmin = X1,
+                      xmax = X2,
+                      y = X3,
+                      fill = X7,
+                      forward=X6),   #  用0和1表示forward和reverse
+                  arrowhead_height = unit(3, "mm"), 
+                  arrowhead_width = unit(1.5, "mm"),
+                  alpha=1)
+
+
+# 绘制共性线及美化
+
+dat02 <- read.csv("collinearity_synline.csv",header = T)
+head(dat02)
+
+ggplot()+
+  geom_segment(data=segment.df,
+               aes(x=min-3,xend=max+3,y=X7,yend=X7),
+               color="grey")+
+  geom_gene_arrow(data=dat01,
+                  aes(xmin = X1,
+                      xmax = X2,
+                      y = X3,
+                      fill = X7,
+                      forward=X6),   #  用0和1表示forward和reverse
+                  arrowhead_height = unit(3, "mm"), 
+                  arrowhead_width = unit(1.5, "mm"),
+                  alpha=1)+
+  geom_diagonal_wide(data = dat02,
+                     aes(x=x,y=y,group=group),
+                     fill="grey",
+                     strength = 0.5,
+                     radius=unit(0,'mm'),
+                     orientation = "y")
+
+ggplot()+
+  geom_segment(data=segment.df,
+               aes(x=min-3,xend=max+3,y=X7,yend=X7),
+               color="grey")+
+  geom_gene_arrow(data=dat01,
+                  aes(xmin = X1,
+                      xmax = X2,
+                      y = X3,
+                      fill = X7,
+                      forward=X6),   #  用0和1表示forward和reverse
+                  arrowhead_height = unit(3, "mm"), 
+                  arrowhead_width = unit(1.5, "mm"),
+                  alpha=1)+
+  geom_diagonal_wide(data = dat02,
+                     aes(x=x,y=y,group=group),
+                     fill="grey",
+                     strength = 0.5,
+                     radius=unit(0,'mm'),
+                     orientation = "y")+
+  theme_classic()+
+  scale_y_continuous(breaks = 1:2,
+                     label=c("Chinese Spring","Chuanmai 104"))
+
+ggplot()+
+  geom_segment(data=segment.df,
+               aes(x=min-3,xend=max+3,y=X7,yend=X7),
+               color="grey")+
+  geom_gene_arrow(data=dat01,
+                  aes(xmin = X1,
+                      xmax = X2,
+                      y = X3,
+                      fill = X7,
+                      forward=X6),   #  用0和1表示forward和reverse
+                  arrowhead_height = unit(3, "mm"), 
+                  arrowhead_width = unit(1.5, "mm"),
+                  alpha=1)+
+  geom_diagonal_wide(data = dat02,
+                     aes(x=x,y=y,group=group),
+                     fill="grey",
+                     strength = 0.5,
+                     radius=unit(0,'mm'),
+                     orientation = "y")+
+  theme_classic()+
+  scale_y_continuous(breaks = 1:2,
+                     label=c("Chinese Spring","Chuanmai 104"))+
+  scale_fill_manual(values = c("#fff","#ffc20e","#db3552"))
