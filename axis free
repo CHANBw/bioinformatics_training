@@ -1,0 +1,48 @@
+library(tidyverse)
+# install.packages("ggh4x")
+
+library(ggplot2)
+library(ggh4x)
+library(tidyverse)
+# 导入文件
+setwd(dir = "D:/bioinformatics/R/my_work/")
+getwd()
+
+df <- read.csv("JM44 phenotype 4A.csv", header = TRUE)
+head(df)
+
+# 作柱形图
+
+
+df1 <- df%>% pivot_longer(cols = 1:8,names_to = "variable",
+                          values_to = "value")
+
+df1
+
+
+
+p1 <- ggplot(df1,aes(x=group,y=value,fill=group))+
+  geom_boxplot(width=0.5)+
+  scale_y_continuous(expand = c(0,0))+
+  facet_wrap(~variable,scales = "free",nrow = 2)+
+  theme_bw()+
+  theme(axis.line = element_line(color='black'),
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
+
+p1
+
+p1+facetted_pos_scales(
+  y=list(variable == "PH" ~ scale_y_continuous(limits = c(50,110),breaks = seq(50,110,10)),
+         variable == "SL" ~ scale_y_continuous(limits = c(5,18),breaks = seq(5,18,2)),
+         variable == "SNS" ~ scale_y_continuous(limits = c(16,32),breaks = seq(16,32,2)),
+         variable == "SD" ~ scale_y_continuous(limits = c(1.5,4),breaks = seq(1.5,4,.5)),
+         variable == "GNS" ~ scale_y_continuous(limits = c(30,120),breaks = seq(30,120,15)),
+         variable == "TGW" ~ scale_y_continuous(limits = c(30,90),breaks = seq(30,90,10)),
+         variable == "GL" ~ scale_y_continuous(limits = c(6,9),breaks = seq(6,9,.5)),
+         variable == "GW" ~ scale_y_continuous(limits = c(3,5),breaks = seq(3,5,.5))
+         
+  )
+)
